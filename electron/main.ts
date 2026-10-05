@@ -1,6 +1,6 @@
 import { app, BrowserWindow } from "electron";
 import path from "node:path";
-import {testSQLite} from "./test-db";
+import { runMigrations } from "./db/index";
 
 const isDev = process.env.NODE_ENV === "development";
 
@@ -26,9 +26,9 @@ function createWindow() {
   }
 }
 
-app.whenReady().then(() => {
-  testSQLite();
-  createWindow();
+app.whenReady().then(async () => {
+   runMigrations();
+    createWindow();
 
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) {

@@ -4,8 +4,6 @@
 
 import { contextBridge } from "electron";
 
-console.log("NexTech preload loaded");
-
 const electronAPI = {
   getAppInfo: () => ({
     name: "NexTech",

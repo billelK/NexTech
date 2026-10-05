@@ -5,13 +5,28 @@
   "private": true,
   "scripts": {
     "dev": "concurrently -k \"next dev\" \"npm run dev:electron\"",
-    "dev:next": "next dev --webpack --hostname 127.0.0.1",
-    "dev:electron": "wait-on http://127.0.0.1:3000 && npm run build:electron && cross-env NODE_ENV=development electron .",
-    "build:electron": "tsc -p tsconfig.electron.json",
+    "dev:next": "next dev",
+    "dev:electron": "wait-on http://localhost:3000 && npm run build:electron && cross-env NODE_ENV=development electron .",
+    "build:electron": "tsc -p tsconfig.electron.json && node scripts/copy-migrations.mjs",
     "build": "next build && npm run build:electron",
     "start": "cross-env NODE_ENV=production electron .",
     "lint": "eslint"
   },
+  "build": {
+  "appId": "com.nextech.app",
+  "productName": "NexTech",
+  "directories": {
+    "output": "release"
+  },
+  "files": [
+    "out/**/*",
+    "dist-electron/**/*",
+    "package.json"
+  ],
+  "win": {
+    "target": "nsis"
+  }
+},
   "dependencies": {
     "@base-ui/react": "^1.8.0",
     "@hookform/resolvers": "^5.9.1",
