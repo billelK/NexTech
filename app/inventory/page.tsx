@@ -34,6 +34,12 @@ import {
 } from "lucide-react";
 
 const PAGE_SIZE = 7;
+const statusLabels: Record<string, string> = {
+  IN_STOCK: "In stock",
+  LOW_STOCK: "Low on stock",
+  OUT_OF_STOCK: "Out of stock",
+  HELD: "Held",
+};
 
 export default function InventoryPage() {
   const {
@@ -145,7 +151,12 @@ export default function InventoryPage() {
           </p>
         </div>
 
-        <AddProductDialog />
+        <AddProductDialog
+          onProductCreated={async (productId) => {
+            await refreshProducts();
+            setSelectedProductId(productId);
+          }}
+        />
       </div>
 
       {/* Database-driven metrics */}
@@ -252,14 +263,21 @@ export default function InventoryPage() {
                             }
                           >
                             {column.key === "status" &&
-                            value !== null &&
-                            value !== undefined ? (
-                              <span className="inline-flex rounded-full bg-muted px-2 py-1 text-xs font-medium">
-                                {formatValue(value)}
+                            typeof value === "string" ? (
+                              <span
+                                className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${
+                                  value === "IN_STOCK"
+                                    ? "bg-green-500/15 text-green-700 dark:text-green-400"
+                                    : value === "LOW_STOCK"
+                                      ? "bg-orange-500/15 text-orange-700 dark:text-orange-400"
+                                      : value === "OUT_OF_STOCK"
+                                        ? "bg-red-500/15 text-red-700 dark:text-red-400"
+                                        : "bg-blue-500/15 text-blue-700 dark:text-blue-400"
+                                }`}
+                              >
+                                {statusLabels[value] ?? value}
                               </span>
-                            ) : (
-                              formatValue(value)
-                            )}
+                            ) : formatValue(value)}
                           </TableCell>
                         );
                       })}

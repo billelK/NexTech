@@ -3,6 +3,11 @@ import path from "node:path";
 import { runMigrations } from "./db/index";
 import { getProducts } from "./db/queries/products";
 import { getProductDetails } from "./db/queries/product_details";
+import {
+  createProduct,
+  getProductFormOptions,
+} from "./db/queries/product_form";
+import type { ProductFormValues } from "./db/validation/product";
 const isDev = process.env.NODE_ENV === "development";
 
 ipcMain.handle("products:get-all", async () => {
@@ -12,6 +17,15 @@ ipcMain.handle("products:get-all", async () => {
 ipcMain.handle("products:get-details", async (_event, productId: number) => {
   return getProductDetails(productId);
 });
+
+ipcMain.handle("products:get-form-options", async () => {
+  return getProductFormOptions();
+});
+
+ipcMain.handle(
+  "products:create",
+  async (_event, input: ProductFormValues) => createProduct(input),
+);
 
 function createWindow() {
   const mainWindow = new BrowserWindow({

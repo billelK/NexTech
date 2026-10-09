@@ -50,6 +50,7 @@ function formatDate(value: Date): string {
 
 function formatStorageType(value: string | null): string {
   if (value === "NVME") return "NVMe";
+  if (value === "SATA") return "SSD";
   return formatValue(value);
 }
 

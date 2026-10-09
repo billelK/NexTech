@@ -65,7 +65,8 @@ export const products = sqliteTable(
 
     /**
      * Used for quantity-tracked products.
-     * Serialized products don't use this as their stock source.
+     * Serialized products use 1 while available and 0 once sold.
+     * Serialized quantity rules are enforced by the stock-rules migration.
      */
     quantity: integer("quantity").notNull().default(0),
 
@@ -127,7 +128,7 @@ export const laptopSpecs = sqliteTable(
     storageCapacityGb: integer("storage_capacity_gb").notNull(),
 
     storageType: text("storage_type", {
-      enum: ["NVME", "SATA", "HDD"],
+      enum: ["NVME", "SSD", "HDD"],
     }).notNull(),
 
     screenSize: integer("screen_size"),

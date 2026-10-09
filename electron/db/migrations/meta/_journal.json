@@ -8,6 +8,13 @@
       "when": 1791202519329,
       "tag": "0000_green_inhumans",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1791569741491,
+      "tag": "0001_product_stock_rules",
+      "breakpoints": true
     }
   ]
 }
