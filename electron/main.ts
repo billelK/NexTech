@@ -1,8 +1,17 @@
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, ipcMain  } from "electron";
 import path from "node:path";
 import { runMigrations } from "./db/index";
-
+import { getProducts } from "./db/queries/products";
+import { getProductDetails } from "./db/queries/product_details";
 const isDev = process.env.NODE_ENV === "development";
+
+ipcMain.handle("products:get-all", async () => {
+  return getProducts();
+});
+
+ipcMain.handle("products:get-details", async (_event, productId: number) => {
+  return getProductDetails(productId);
+});
 
 function createWindow() {
   const mainWindow = new BrowserWindow({

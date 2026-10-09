@@ -2,13 +2,17 @@
 
 // contextBridge.exposeInMainWorld("electronAPI", {});
 
-import { contextBridge } from "electron";
+import { contextBridge, ipcRenderer} from "electron";
 
 const electronAPI = {
-  getAppInfo: () => ({
-    name: "NexTech",
-    platform: process.platform,
-  }),
+  // getAppInfo: () => ({
+  //   name: "NexTech",
+  //   platform: process.platform,
+  // }),
+
+  getProducts: () => ipcRenderer.invoke("products:get-all"),
+  getProductDetails: (productId: number) =>
+    ipcRenderer.invoke("products:get-details", productId),
 };
 
 contextBridge.exposeInMainWorld("electronAPI", electronAPI);
