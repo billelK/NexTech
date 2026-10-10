@@ -277,7 +277,12 @@ export default function InventoryPage() {
                               >
                                 {statusLabels[value] ?? value}
                               </span>
-                            ) : formatValue(value)}
+
+                            ) : column.key === "sellingPrice" && typeof value === "number" ? (
+                              `${formatValue(value)} DA`
+                            ) : (
+                              formatValue(value)
+                            )}
                           </TableCell>
                         );
                       })}

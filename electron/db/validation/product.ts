@@ -8,9 +8,9 @@ const productFieldsSchema = z.object({
   brandId: z.number().int().positive("Select a brand."),
   categoryId: z.number().int().positive("Select a category."),
   trackingType: z.enum(["QUANTITY", "SERIALIZED"]),
-  quantity: z.number().int().nonnegative("Quantity cannot be negative."),
-  costPrice: z.number().finite("Enter a valid cost price."),
-  sellingPrice: z.number().finite("Enter a valid selling price."),
+  quantity: z.number().int().min(1, "Quantity cannot be less than 1."),
+  costPrice: z.number().min(1,"Enter a valid cost price."),
+  sellingPrice: z.number().min(1,"Enter a valid cost price."),
   ramCapacityGb: z
     .union([z.literal(8), z.literal(16), z.literal(32), z.literal(64)])
     .optional(),
@@ -25,9 +25,8 @@ const productFieldsSchema = z.object({
     .optional(),
   storageType: z.enum(["NVME", "SSD", "HDD"]).optional(),
   screenSize: z
-    .number()
-    .finite()
-    .positive("Screen size must be greater than zero.")
+    .number({ error: "Enter a valid screen size." })
+    .min(1, "Enter a valid screen size.")
     .optional(),
   cpu: z.string().trim().optional(),
   gpu: z.string().trim().optional(),
@@ -54,10 +53,10 @@ export function createProductSchema(isLaptop: boolean) {
         "Select storage capacity.",
       ],
       ["storageType", values.storageType, "Select storage type."],
-      ["screenSize", values.screenSize, "Enter screen size."],
+      ["screenSize", values.screenSize, "Enter a valid screen size."],
       ["cpu", values.cpu?.trim(), "Enter a CPU."],
       ["gpu", values.gpu?.trim(), "Enter a GPU."],
-      ["serialNumber", values.serialNumber?.trim(), "Enter a serial number."],
+      ["serialNumber", values.serialNumber?.trim(), "Enter the laptop's serial number."],
     ] as const;
 
     for (const [field, value, message] of requiredLaptopFields) {

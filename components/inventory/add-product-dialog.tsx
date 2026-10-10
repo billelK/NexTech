@@ -209,8 +209,8 @@ export function AddProductDialog({
         <LayersPlus className="size-4" />
         Add product
       </DialogTrigger>
-      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
-        <DialogHeader>
+      <DialogContent className="flex max-h-[calc(100dvh-2rem)] flex-col gap-0 overflow-hidden p-0 sm:max-w-2xl">
+        <DialogHeader className="shrink-0 border-b px-6 py-5">
           <DialogTitle>Add product</DialogTitle>
           <DialogDescription>
             Enter product details. A unique barcode will be generated
@@ -218,7 +218,11 @@ export function AddProductDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <form className="grid gap-4 sm:grid-cols-2" onSubmit={submit}>
+        <form
+          className="flex min-h-0 flex-1 flex-col"
+          onSubmit={submit}
+        >
+          <div className="grid min-h-0 flex-1 content-start gap-4 overflow-y-auto overscroll-contain px-6 py-5 [scrollbar-color:var(--border)_transparent] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border">
           {optionsError && (
             <div className="flex items-center justify-between gap-3 sm:col-span-2">
               <p className="text-sm text-destructive" role="alert">
@@ -471,13 +475,15 @@ export function AddProductDialog({
             </>
           )}
 
-          {form.formState.errors.root?.validation?.message && (
-            <p className="sm:col-span-2 text-sm text-destructive" role="alert">
-              {form.formState.errors.root.validation.message}
-            </p>
-          )}
+          </div>
 
-          <div className="flex flex-col-reverse gap-2 sm:col-span-2 sm:flex-row sm:justify-end">
+          <div className="flex shrink-0 flex-col gap-3 border-t bg-background px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+            {form.formState.errors.root?.validation?.message && (
+              <p className="text-sm text-destructive" role="alert">
+                {form.formState.errors.root.validation.message}
+              </p>
+            )}
+            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             <Button
               type="button"
               variant="outline"
@@ -488,6 +494,7 @@ export function AddProductDialog({
             <Button type="submit" disabled={form.formState.isSubmitting}>
               {form.formState.isSubmitting ? "Adding..." : "Add product"}
             </Button>
+            </div>
           </div>
         </form>
       </DialogContent>
