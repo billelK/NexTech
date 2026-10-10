@@ -19,6 +19,7 @@ type ProductDetails = Awaited<
 type ProductDetailsDialogProps = {
   productId: number | null;
   onOpenChange: (open: boolean) => void;
+  onEdit: (productId: number) => void;
 };
 
 type ProductRequest = {
@@ -57,6 +58,7 @@ function formatStorageType(value: string | null): string {
 export function ProductDetailsDialog({
   productId,
   onOpenChange,
+  onEdit,
 }: ProductDetailsDialogProps) {
   const open = productId !== null;
   const [request, setRequest] = useState<ProductRequest | null>(null);
@@ -191,7 +193,11 @@ export function ProductDetailsDialog({
                 <Printer />
                 Print barcode
               </Button>
-              <Button disabled size="sm" variant="outline">
+              <Button
+                onClick={() => onEdit(product.id)}
+                size="sm"
+                variant="outline"
+              >
                 <Pencil />
                 Edit
               </Button>

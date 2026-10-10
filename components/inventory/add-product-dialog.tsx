@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import { LayersPlus } from "lucide-react";
@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import {
   createProductSchema,
+  editProductSchema,
   isLaptopCategory,
   type ProductFormValues,
 } from "@/electron/db/validation/product";
@@ -27,6 +28,8 @@ type ProductFormOptions = Awaited<
 
 type AddProductDialogProps = {
   onProductCreated: (productId: number) => Promise<void>;
+  editProductId?: number | null;
+  onEditClose?: () => void;
 };
 
 const defaultValues: ProductFormValues = {
@@ -98,15 +101,54 @@ function parseStorageCapacity(
   }
 }
 
+function toRamCapacity(
+  value: number | null,
+): ProductFormValues["ramCapacityGb"] {
+  switch (value) {
+    case 8:
+    case 16:
+    case 32:
+    case 64:
+      return value;
+    default:
+      return undefined;
+  }
+}
+
+function toStorageCapacity(
+  value: number | null,
+): ProductFormValues["storageCapacityGb"] {
+  switch (value) {
+    case 128:
+    case 256:
+    case 512:
+    case 1024:
+      return value;
+    default:
+      return undefined;
+  }
+}
+
+function toRamType(
+  value: "DDR3" | "DDR4" | "DDR5" | null,
+): ProductFormValues["ramType"] {
+  if (value === "DDR4" || value === "DDR5") return value;
+  return undefined;
+}
+
 export function AddProductDialog({
   onProductCreated,
+  editProductId = null,
+  onEditClose,
 }: AddProductDialogProps) {
-  const [open, setOpen] = useState(false);
+  const isEditing = editProductId !== null;
+  const [open, setOpen] = useState(isEditing);
   const [options, setOptions] = useState<ProductFormOptions>({
     brands: [],
     categories: [],
   });
   const [isLoadingOptions, setIsLoadingOptions] = useState(false);
+  const [isLoadingProduct, setIsLoadingProduct] = useState(isEditing);
   const [optionsError, setOptionsError] = useState<string | null>(null);
   const form = useForm<ProductFormValues>({
     defaultValues,
@@ -144,35 +186,74 @@ export function AddProductDialog({
     ? isLaptopCategory(selectedCategory.name)
     : false;
 
-  function loadOptions() {
+  const loadOptions = useCallback(async (productId: number | null = null) => {
     setIsLoadingOptions(true);
+    setIsLoadingProduct(productId !== null);
     setOptionsError(null);
-    window.electronAPI
-      .getProductFormOptions()
-      .then(setOptions)
-      .catch((cause: unknown) => {
-        const message =
-          cause instanceof Error
-            ? cause.message
-            : "Could not load brand and category options.";
-        setOptionsError(message);
-      })
-      .finally(() => setIsLoadingOptions(false));
-  }
+    try {
+      const [formOptions, product] = await Promise.all([
+        window.electronAPI.getProductFormOptions(),
+        productId === null
+          ? Promise.resolve(null)
+          : window.electronAPI.getProductForEdit(productId),
+      ]);
+      setOptions(formOptions);
+      if (productId !== null) {
+        if (!product) throw new Error("The product could not be found.");
+        form.reset({
+          name: product.name,
+          brandId: product.brandId,
+          categoryId: product.categoryId,
+          trackingType: product.trackingType,
+          quantity: product.quantity,
+          costPrice: product.costPrice,
+          sellingPrice: product.sellingPrice,
+          ramCapacityGb: toRamCapacity(product.ramCapacityGb),
+          ramType: toRamType(product.ramType),
+          storageCapacityGb: toStorageCapacity(product.storageCapacityGb),
+          storageType: product.storageType ?? undefined,
+          screenSize: product.screenSize ?? undefined,
+          cpu: product.cpu ?? "",
+          gpu: product.gpu ?? "",
+          serialNumber: product.serialNumber ?? "",
+        });
+      }
+    } catch (cause) {
+      setOptionsError(
+        cause instanceof Error
+          ? cause.message
+          : "Could not load the product form.",
+      );
+    } finally {
+      setIsLoadingOptions(false);
+      setIsLoadingProduct(false);
+    }
+  }, [form]);
+
+  useEffect(() => {
+    if (editProductId !== null) {
+      void Promise.resolve().then(() => loadOptions(editProductId));
+    }
+  }, [editProductId, loadOptions]);
 
   function handleOpenChange(nextOpen: boolean) {
     setOpen(nextOpen);
     if (nextOpen) {
-      loadOptions();
+      if (!isEditing) void loadOptions();
     } else {
       form.reset(defaultValues);
       form.clearErrors();
+      if (isEditing) onEditClose?.();
     }
   }
 
   const submit = form.handleSubmit(async (values) => {
     form.clearErrors();
-    const parsed = createProductSchema(laptopSelected).safeParse(values);
+    const parsed = (
+      isEditing
+        ? editProductSchema(laptopSelected)
+        : createProductSchema(laptopSelected)
+    ).safeParse(values);
     if (!parsed.success) {
       form.setError("root.validation", {
         type: "validation",
@@ -182,15 +263,25 @@ export function AddProductDialog({
     }
 
     try {
-      const productId = await window.electronAPI.createProduct(parsed.data);
+      let productId: number;
+      if (editProductId !== null) {
+        productId = await window.electronAPI.updateProduct(
+          editProductId,
+          parsed.data,
+        );
+      } else {
+        productId = await window.electronAPI.createProduct(parsed.data);
+      }
       await onProductCreated(productId);
-      toast.success("Product added successfully.");
+      toast.success(isEditing ? "Product updated successfully." : "Product added successfully.");
       form.reset(defaultValues);
       setOpen(false);
     } catch (cause) {
       const message =
-        cause instanceof Error ? cause.message : "Could not add the product.";
-      toast.error(`Product could not be added: ${message}`);
+        cause instanceof Error ? cause.message : "Could not save the product.";
+      toast.error(
+        `Product could not be ${isEditing ? "updated" : "added"}: ${message}`,
+      );
     }
   });
 
@@ -205,16 +296,19 @@ export function AddProductDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger render={<Button />}>
-        <LayersPlus className="size-4" />
-        Add product
-      </DialogTrigger>
+      {!isEditing && (
+        <DialogTrigger render={<Button />}>
+          <LayersPlus className="size-4" />
+          Add product
+        </DialogTrigger>
+      )}
       <DialogContent className="flex max-h-[calc(100dvh-2rem)] flex-col gap-0 overflow-hidden p-0 sm:max-w-2xl">
         <DialogHeader className="shrink-0 border-b px-6 py-5">
-          <DialogTitle>Add product</DialogTitle>
+          <DialogTitle>{isEditing ? "Edit product" : "Add product"}</DialogTitle>
           <DialogDescription>
-            Enter product details. A unique barcode will be generated
-            automatically.
+            {isEditing
+              ? "Update the product details and specifications."
+              : "Enter product details. A unique barcode will be generated automatically."}
           </DialogDescription>
         </DialogHeader>
 
@@ -223,12 +317,22 @@ export function AddProductDialog({
           onSubmit={submit}
         >
           <div className="grid min-h-0 flex-1 content-start gap-4 overflow-y-auto overscroll-contain px-6 py-5 [scrollbar-color:var(--border)_transparent] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border">
+          {isLoadingProduct && (
+            <p className="sm:col-span-2 text-sm text-muted-foreground">
+              Loading product details...
+            </p>
+          )}
           {optionsError && (
             <div className="flex items-center justify-between gap-3 sm:col-span-2">
               <p className="text-sm text-destructive" role="alert">
                 {optionsError}
               </p>
-              <Button type="button" size="sm" variant="outline" onClick={loadOptions}>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={() => void loadOptions(editProductId)}
+              >
                 Retry
               </Button>
             </div>
@@ -331,8 +435,9 @@ export function AddProductDialog({
             <Input
               className={numberInputClassName}
               inputMode="numeric"
-              min={0}
-              readOnly={trackingType === "SERIALIZED"}
+              readOnly={trackingType === "SERIALIZED" && !isEditing}
+              disabled={isLoadingProduct}
+              min={isEditing ? 0 : 1}
               step={1}
               type="number"
               {...form.register("quantity", { valueAsNumber: true })}
@@ -477,23 +582,36 @@ export function AddProductDialog({
 
           </div>
 
-          <div className="flex shrink-0 flex-col gap-3 border-t bg-background px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex shrink-0 flex-col gap-3 border-t bg-background px-6 py-4">
             {form.formState.errors.root?.validation?.message && (
               <p className="text-sm text-destructive" role="alert">
                 {form.formState.errors.root.validation.message}
               </p>
             )}
-            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => handleOpenChange(false)}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={form.formState.isSubmitting}>
-              {form.formState.isSubmitting ? "Adding..." : "Add product"}
-            </Button>
+            <div className="flex items-center justify-between gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => handleOpenChange(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={
+                  form.formState.isSubmitting ||
+                  isLoadingOptions ||
+                  isLoadingProduct
+                }
+              >
+                {form.formState.isSubmitting
+                  ? isEditing
+                    ? "Saving..."
+                    : "Adding..."
+                  : isEditing
+                    ? "Save changes"
+                    : "Add product"}
+              </Button>
             </div>
           </div>
         </form>

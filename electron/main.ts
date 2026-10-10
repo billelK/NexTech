@@ -7,6 +7,10 @@ import {
   createProduct,
   getProductFormOptions,
 } from "./db/queries/product_form";
+import {
+  getProductForEdit,
+  updateProduct,
+} from "./db/queries/product_edit";
 import type { ProductFormValues } from "./db/validation/product";
 const isDev = process.env.NODE_ENV === "development";
 
@@ -25,6 +29,16 @@ ipcMain.handle("products:get-form-options", async () => {
 ipcMain.handle(
   "products:create",
   async (_event, input: ProductFormValues) => createProduct(input),
+);
+
+ipcMain.handle("products:get-for-edit", async (_event, productId: number) =>
+  getProductForEdit(productId),
+);
+
+ipcMain.handle(
+  "products:update",
+  async (_event, productId: number, input: ProductFormValues) =>
+    updateProduct(productId, input),
 );
 
 function createWindow() {

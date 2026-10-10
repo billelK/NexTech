@@ -10,7 +10,7 @@ const productFieldsSchema = z.object({
   trackingType: z.enum(["QUANTITY", "SERIALIZED"]),
   quantity: z.number().int().min(1, "Quantity cannot be less than 1."),
   costPrice: z.number().min(1,"Enter a valid cost price."),
-  sellingPrice: z.number().min(1,"Enter a valid cost price."),
+  sellingPrice: z.number().min(1,"Enter a valid selling price."),
   ramCapacityGb: z
     .union([z.literal(8), z.literal(16), z.literal(32), z.literal(64)])
     .optional(),
@@ -40,8 +40,11 @@ export function isLaptopCategory(categoryName: string): boolean {
   return name === "laptop" || name === "laptops";
 }
 
-export function createProductSchema(isLaptop: boolean) {
-  return productFieldsSchema.superRefine((values, context) => {
+function requireLaptopFields(
+  values: ProductFormValues,
+  context: z.RefinementCtx,
+  isLaptop: boolean,
+) {
     if (!isLaptop) return;
 
     const requiredLaptopFields = [
@@ -68,5 +71,20 @@ export function createProductSchema(isLaptop: boolean) {
         });
       }
     }
-  });
+}
+
+export function createProductSchema(isLaptop: boolean) {
+  return productFieldsSchema.superRefine((values, context) =>
+    requireLaptopFields(values, context, isLaptop),
+  );
+}
+
+export function editProductSchema(isLaptop: boolean) {
+  return productFieldsSchema
+    .extend({
+      quantity: z.number().int().nonnegative("Quantity cannot be negative."),
+    })
+    .superRefine((values, context) =>
+      requireLaptopFields(values, context, isLaptop),
+    );
 }

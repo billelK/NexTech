@@ -5,6 +5,10 @@ import type {
   getProductFormOptions,
 } from "../electron/db/queries/product_form";
 import type { ProductFormValues } from "../electron/db/validation/product";
+import type {
+  getProductForEdit,
+  updateProduct,
+} from "../electron/db/queries/product_edit";
 interface ElectronAPI {
   // getAppInfo: () => {
   //   name: string;
@@ -16,6 +20,13 @@ interface ElectronAPI {
   ) => ReturnType<typeof getProductDetails>;
   getProductFormOptions: () => ReturnType<typeof getProductFormOptions>;
   createProduct: (input: ProductFormValues) => ReturnType<typeof createProduct>;
+  getProductForEdit: (
+    productId: number,
+  ) => ReturnType<typeof getProductForEdit>;
+  updateProduct: (
+    productId: number,
+    input: ProductFormValues,
+  ) => ReturnType<typeof updateProduct>;
 }
 
 declare global {

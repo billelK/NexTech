@@ -8,6 +8,10 @@ const electronAPI = {
   getProductFormOptions: () => ipcRenderer.invoke("products:get-form-options"),
   createProduct: (input: ProductFormValues) =>
     ipcRenderer.invoke("products:create", input),
+  getProductForEdit: (productId: number) =>
+    ipcRenderer.invoke("products:get-for-edit", productId),
+  updateProduct: (productId: number, input: ProductFormValues) =>
+    ipcRenderer.invoke("products:update", productId, input),
 };
 
 contextBridge.exposeInMainWorld("electronAPI", electronAPI);

@@ -53,6 +53,15 @@ export default function InventoryPage() {
   const [selectedProductId, setSelectedProductId] = useState<number | null>(
     null,
   );
+  const [editingProductId, setEditingProductId] = useState<number | null>(
+    null,
+  );
+
+  async function handleProductSaved(productId: number) {
+    await refreshProducts();
+    setEditingProductId(null);
+    setSelectedProductId(productId);
+  }
 
   const columns = [
     { key: "name", label: "Product Name" },
@@ -151,12 +160,7 @@ export default function InventoryPage() {
           </p>
         </div>
 
-        <AddProductDialog
-          onProductCreated={async (productId) => {
-            await refreshProducts();
-            setSelectedProductId(productId);
-          }}
-        />
+        <AddProductDialog onProductCreated={handleProductSaved} />
       </div>
 
       {/* Database-driven metrics */}
@@ -338,10 +342,22 @@ export default function InventoryPage() {
       </div>
       <ProductDetailsDialog
         productId={selectedProductId}
+        onEdit={(productId) => {
+          setSelectedProductId(null);
+          setEditingProductId(productId);
+        }}
         onOpenChange={(open) => {
           if (!open) setSelectedProductId(null);
         }}
       />
+      {editingProductId !== null && (
+        <AddProductDialog
+          key={editingProductId}
+          editProductId={editingProductId}
+          onEditClose={() => setEditingProductId(null)}
+          onProductCreated={handleProductSaved}
+        />
+      )}
     </div>
   );
 }
