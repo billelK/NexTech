@@ -9,6 +9,7 @@ import type {
   getProductForEdit,
   updateProduct,
 } from "../electron/db/queries/product_edit";
+import type { deleteProduct } from "../electron/db/queries/product_delete";
 interface ElectronAPI {
   // getAppInfo: () => {
   //   name: string;
@@ -27,6 +28,7 @@ interface ElectronAPI {
     productId: number,
     input: ProductFormValues,
   ) => ReturnType<typeof updateProduct>;
+  deleteProduct: (productId: number) => ReturnType<typeof deleteProduct>;
 }
 
 declare global {

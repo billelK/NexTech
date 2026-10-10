@@ -11,6 +11,7 @@ import {
   getProductForEdit,
   updateProduct,
 } from "./db/queries/product_edit";
+import { deleteProduct } from "./db/queries/product_delete";
 import type { ProductFormValues } from "./db/validation/product";
 const isDev = process.env.NODE_ENV === "development";
 
@@ -39,6 +40,10 @@ ipcMain.handle(
   "products:update",
   async (_event, productId: number, input: ProductFormValues) =>
     updateProduct(productId, input),
+);
+
+ipcMain.handle("products:delete", async (_event, productId: number) =>
+  deleteProduct(productId),
 );
 
 function createWindow() {

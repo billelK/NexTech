@@ -12,6 +12,8 @@ const electronAPI = {
     ipcRenderer.invoke("products:get-for-edit", productId),
   updateProduct: (productId: number, input: ProductFormValues) =>
     ipcRenderer.invoke("products:update", productId, input),
+  deleteProduct: (productId: number) =>
+    ipcRenderer.invoke("products:delete", productId),
 };
 
 contextBridge.exposeInMainWorld("electronAPI", electronAPI);

@@ -57,7 +57,7 @@ export function AppSidebar() {
             <img
               src="/logo_app_white.png"
               alt="NexTech logo"
-              className="object-cover h-[45px] w-[45px]"
+              className="object-cover h-[25px] w-[25px]"
             />
           </div>
 

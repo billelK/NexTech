@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { useAppContext } from "@/contexts/app-context";
 import { AddProductDialog } from "@/components/inventory/add-product-dialog";
 import { ProductDetailsDialog } from "@/components/inventory/product-details-dialog";
+import { ProductDeleteDialog } from "@/components/inventory/product-delete-dialog";
 
 import {
   Card,
@@ -31,6 +32,7 @@ import {
   ChevronRight,
   Package,
   Shapes,
+  Trash2,
 } from "lucide-react";
 
 const PAGE_SIZE = 7;
@@ -56,6 +58,10 @@ export default function InventoryPage() {
   const [editingProductId, setEditingProductId] = useState<number | null>(
     null,
   );
+  const [productToDelete, setProductToDelete] = useState<{
+    id: number;
+    name: string;
+  } | null>(null);
 
   async function handleProductSaved(productId: number) {
     await refreshProducts();
@@ -236,6 +242,9 @@ export default function InventoryPage() {
                         {column.label}
                       </TableHead>
                     ))}
+                    <TableHead className="whitespace-nowrap text-right">
+                      Actions
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
 
@@ -290,6 +299,23 @@ export default function InventoryPage() {
                           </TableCell>
                         );
                       })}
+                      <TableCell className="text-right">
+                        <Button
+                          aria-label={`Delete ${product.name}`}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            setProductToDelete({
+                              id: product.id,
+                              name: product.name,
+                            });
+                          }}
+                          onKeyDown={(event) => event.stopPropagation()}
+                          size="icon-sm"
+                          variant="ghost"
+                        >
+                          <Trash2 className="text-destructive" />
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -348,6 +374,16 @@ export default function InventoryPage() {
         }}
         onOpenChange={(open) => {
           if (!open) setSelectedProductId(null);
+        }}
+      />
+      <ProductDeleteDialog
+        product={productToDelete}
+        onOpenChange={(open) => {
+          if (!open) setProductToDelete(null);
+        }}
+        onDeleted={async () => {
+          setProductToDelete(null);
+          await refreshProducts();
         }}
       />
       {editingProductId !== null && (

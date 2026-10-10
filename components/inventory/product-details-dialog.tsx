@@ -133,7 +133,9 @@ export function ProductDetailsDialog({
   }
 
   function handleOpenChange(nextOpen: boolean) {
-    if (!nextOpen) setBarcodeError(null);
+    if (!nextOpen) {
+      setBarcodeError(null);
+    }
     onOpenChange(nextOpen);
   }
 
