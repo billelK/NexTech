@@ -10,8 +10,15 @@ type InventoryProduct = Awaited<
   ReturnType<typeof window.electronAPI.getProducts>
 >[number];
 
+type ProductFormOption = {
+  id: number;
+  name: string;
+};
+
 export type AppContextValue = {
   products: InventoryProduct[];
+  categories: ProductFormOption[];
+  brands: ProductFormOption[];
   isLoadingProducts: boolean;
   productsError: string | null;
   refreshProducts: () => Promise<void>;

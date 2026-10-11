@@ -23,6 +23,8 @@ type AppProviderProps = {
 
 export function AppProvider({ children }: AppProviderProps) {
   const [products, setProducts] = useState<InventoryProduct[]>([]);
+  const [categories, setCategories] = useState<{ id: number; name: string }[]>([]);
+  const [brands, setBrands] = useState<{ id: number; name: string }[]>([]);
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
   const [productsError, setProductsError] = useState<string | null>(null);
 
@@ -31,8 +33,14 @@ export function AppProvider({ children }: AppProviderProps) {
     setProductsError(null);
 
     try {
-      const result = await window.electronAPI.getProducts();
-      setProducts(result);
+      const [productResult, productFormOptions] = await Promise.all([
+        window.electronAPI.getProducts(),
+        window.electronAPI.getProductFormOptions(),
+      ]);
+
+      setProducts(productResult);
+      setCategories(productFormOptions.categories);
+      setBrands(productFormOptions.brands);
     } catch (error) {
       console.error("Failed to load inventory products:", error);
       setProductsError("Unable to load inventory products.");
@@ -47,6 +55,8 @@ export function AppProvider({ children }: AppProviderProps) {
 
   const value: AppContextValue = {
     products,
+    categories,
+    brands,
     isLoadingProducts,
     productsError,
     refreshProducts,

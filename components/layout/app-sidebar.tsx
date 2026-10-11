@@ -48,12 +48,12 @@ export function AppSidebar() {
       collapsible="icon"
       className="border-r border-white/6"
     >
-      <SidebarHeader className="border-b border-white/0 p-4">
+      <SidebarHeader className="border-b border-white/0 p-4 group-data-[collapsible=icon]:p-2">
         <Link
           href="/inventory"
-          className="flex items-center gap-3"
+          className="flex items-center gap-3 group-data-[collapsible=icon]:justify-center"
         >
-          <div className="flex size-9 shrink-0 bg-black items-center justify-center overflow-hidden rounded-lg text-primary-foreground">
+          <div className="flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-black text-primary-foreground group-data-[collapsible=icon]:size-8">
             <img
               src="/logo_app_white.png"
               alt="NexTech logo"
@@ -61,7 +61,7 @@ export function AppSidebar() {
             />
           </div>
 
-          <div className="grid flex-1 text-left text-sm leading-tight">
+          <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
             <span className="truncate font-semibold">
               NexTech
             </span>

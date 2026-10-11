@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain  } from "electron";
+import { app, BrowserWindow, ipcMain, Menu } from "electron";
 import path from "node:path";
 import { runMigrations } from "./db/index";
 import { getProducts } from "./db/queries/products";
@@ -14,6 +14,8 @@ import {
 import { deleteProduct } from "./db/queries/product_delete";
 import type { ProductFormValues } from "./db/validation/product";
 const isDev = process.env.NODE_ENV === "development";
+
+Menu.setApplicationMenu(null);
 
 ipcMain.handle("products:get-all", async () => {
   return getProducts();
@@ -52,6 +54,7 @@ function createWindow() {
     height: 768,
     minWidth: 1100,
     minHeight: 650,
+    autoHideMenuBar: true,
 
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
