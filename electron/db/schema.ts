@@ -173,3 +173,8 @@ export const stockMovements = sqliteTable("stock_movements", {
     mode: "timestamp_ms",
   }).notNull().$defaultFn(() => new Date()),
 });
+
+export const appSettings = sqliteTable("app_settings", {
+  key: text("key").primaryKey(),
+  value: text("value").notNull(),
+});

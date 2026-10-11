@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import JsBarcode from "jsbarcode";
+import { useEffect, useState } from "react";
 import { Pencil, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -63,7 +62,6 @@ export function ProductDetailsDialog({
   const open = productId !== null;
   const [request, setRequest] = useState<ProductRequest | null>(null);
   const [retryCount, setRetryCount] = useState(0);
-  const barcodeRef = useRef<SVGSVGElement>(null);
   const [barcodeError, setBarcodeError] = useState<string | null>(null);
 
   const hasCurrentRequest =
@@ -108,26 +106,16 @@ export function ProductDetailsDialog({
     };
   }, [open, productId, retryCount]);
 
-  function printBarcode() {
-    if (!product?.barcode || !barcodeRef.current) return;
-
+  async function openStickerPreview() {
+    if (!product) return;
     try {
-      JsBarcode(barcodeRef.current, product.barcode, {
-        format: "CODE128",
-        background: "#ffffff",
-        displayValue: true,
-        height: 72,
-        lineColor: "#000000",
-        margin: 12,
-        width: 2,
-      });
       setBarcodeError(null);
-      requestAnimationFrame(() => window.print());
+      await window.electronAPI.openStickerPreview(product.id);
     } catch (cause) {
       setBarcodeError(
         cause instanceof Error
           ? cause.message
-          : "Could not generate the barcode.",
+          : "Could not open the barcode sticker preview.",
       );
     }
   }
@@ -187,13 +175,12 @@ export function ProductDetailsDialog({
           {product && (
             <div className="flex shrink-0 flex-col gap-2">
               <Button
-                disabled={!product.barcode}
-                onClick={printBarcode}
+                onClick={() => void openStickerPreview()}
                 size="sm"
                 variant="outline"
               >
                 <Printer />
-                Print barcode
+                Print Barcode
               </Button>
               <Button
                 onClick={() => onEdit(product.id)}
@@ -300,45 +287,6 @@ export function ProductDetailsDialog({
           </div>
         )}
 
-        {product?.barcode && (
-          <div
-            aria-hidden="true"
-            className="sr-only"
-            id="product-barcode-print"
-          >
-            <p>{product.name}</p>
-            <svg ref={barcodeRef} />
-          </div>
-        )}
-
-        <style>{`
-          @media print {
-            @page { margin: 12mm; }
-            body * { visibility: hidden !important; }
-            #product-barcode-print,
-            #product-barcode-print * { visibility: visible !important; }
-            #product-barcode-print {
-              position: fixed !important;
-              inset: 0 auto auto 0 !important;
-              width: 100% !important;
-              height: auto !important;
-              margin: 0 !important;
-              padding: 24px !important;
-              overflow: visible !important;
-              clip: auto !important;
-              white-space: normal !important;
-              border: 0 !important;
-              background: #fff !important;
-              color: #000 !important;
-            }
-            #product-barcode-print svg {
-              display: block !important;
-              width: auto !important;
-              max-width: 100% !important;
-              height: auto !important;
-            }
-          }
-        `}</style>
       </DialogContent>
     </Dialog>
   );
