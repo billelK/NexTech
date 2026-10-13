@@ -1,5 +1,6 @@
 import { contextBridge, ipcRenderer} from "electron";
 import type { ProductFormValues } from "./db/validation/product";
+import type { CatalogEntry } from "./db/queries/catalog";
 
 const electronAPI = {
   getProducts: () => ipcRenderer.invoke("products:get-all"),
@@ -28,6 +29,22 @@ const electronAPI = {
     ipcRenderer.invoke("products:update", productId, input),
   deleteProduct: (productId: number) =>
     ipcRenderer.invoke("products:delete", productId),
+  getCategories: (): Promise<CatalogEntry[]> =>
+    ipcRenderer.invoke("catalog:categories:get"),
+  createCategory: (name: string): Promise<CatalogEntry> =>
+    ipcRenderer.invoke("catalog:categories:create", name),
+  updateCategory: (id: number, name: string): Promise<CatalogEntry> =>
+    ipcRenderer.invoke("catalog:categories:update", id, name),
+  deleteCategory: (id: number): Promise<number> =>
+    ipcRenderer.invoke("catalog:categories:delete", id),
+  getBrands: (): Promise<CatalogEntry[]> =>
+    ipcRenderer.invoke("catalog:brands:get"),
+  createBrand: (name: string): Promise<CatalogEntry> =>
+    ipcRenderer.invoke("catalog:brands:create", name),
+  updateBrand: (id: number, name: string): Promise<CatalogEntry> =>
+    ipcRenderer.invoke("catalog:brands:update", id, name),
+  deleteBrand: (id: number): Promise<number> =>
+    ipcRenderer.invoke("catalog:brands:delete", id),
 };
 
 contextBridge.exposeInMainWorld("electronAPI", electronAPI);

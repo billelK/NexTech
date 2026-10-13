@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   RefreshCw,
@@ -8,6 +7,10 @@ import {
   Users,
   Layers
 } from "lucide-react";
+import {
+  AppLink,
+  getStaticExportHref,
+} from "@/components/layout/app-link";
 
 import {
   Sidebar,
@@ -42,6 +45,10 @@ const navigation = [
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const logoSrc =
+    process.env.NODE_ENV === "development"
+      ? "/logo_app_white.png"
+      : getStaticExportHref(pathname ?? "/", "/logo_app_white.png");
 
   return (
     <Sidebar
@@ -49,13 +56,13 @@ export function AppSidebar() {
       className="border-r border-white/6"
     >
       <SidebarHeader className="border-b border-white/0 p-4 group-data-[collapsible=icon]:p-2">
-        <Link
+        <AppLink
           href="/inventory"
           className="flex items-center gap-3 group-data-[collapsible=icon]:justify-center"
         >
           <div className="flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-black text-primary-foreground group-data-[collapsible=icon]:size-8">
             <img
-              src="/logo_app_white.png"
+              src={logoSrc}
               alt="NexTech logo"
               className="object-cover h-[25px] w-[25px]"
             />
@@ -70,7 +77,7 @@ export function AppSidebar() {
               Management System
             </span>
           </div>
-        </Link>
+        </AppLink>
       </SidebarHeader>
 
       <SidebarContent>
@@ -92,10 +99,10 @@ export function AppSidebar() {
                   <SidebarMenuButton
                     key={item.href}
                     render={
-                      <Link href={item.href}>
+                      <AppLink href={item.href}>
                         <Icon />
                         <span>{item.title}</span>
-                      </Link>
+                      </AppLink>
                     }
                     isActive={isActive}
                     tooltip={item.title}
@@ -114,10 +121,10 @@ export function AppSidebar() {
               isActive={pathname.startsWith("/settings")}
               tooltip="Settings"
                     render={
-                    <Link href="/settings">
+                    <AppLink href="/settings">
                       <Settings />
                       <span>Settings</span>
-                    </Link>
+                    </AppLink>
                     }
                     
                   />

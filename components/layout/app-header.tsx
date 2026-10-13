@@ -15,16 +15,16 @@ export function AppHeader() {
         <SidebarTrigger />
       </div>
 
-      <div className="ml-4 hidden w-full max-w-md md:block">
-        {/* <div className="relative">
+      {/* <div className="ml-4 hidden w-full max-w-md md:block">
+        <div className="relative">
           <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
 
           <Input
             placeholder="Search..."
             className="h-9 border-white/6 border bg-background pl-9"
           />
-        </div> */}
-      </div>
+        </div>
+      </div> */}
 
       <div className="ml-auto flex items-center gap-2">
         <Button

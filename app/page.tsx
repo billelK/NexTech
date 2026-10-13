@@ -1,5 +1,11 @@
-import { redirect } from "next/navigation";
+"use client";
+
+import { useEffect } from "react";
 
 export default function Home() {
-  redirect("/inventory");
+  useEffect(() => {
+    window.location.replace("./inventory.html");
+  }, []);
+
+  return null;
 }

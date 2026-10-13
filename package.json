@@ -8,7 +8,7 @@
     "dev:next": "next dev",
     "dev:electron": "wait-on http://localhost:3000 && npm run build:electron && cross-env NODE_ENV=development electron .",
     "build:electron": "tsc -p tsconfig.electron.json && node scripts/copy-migrations.mjs",
-    "build": "next build && npm run build:electron",
+    "build": "next build && node scripts/fix-static-export-assets.mjs && npm run build:electron",
     "start": "cross-env NODE_ENV=production electron .",
     "lint": "eslint"
   },

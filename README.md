@@ -20,6 +20,13 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Electron desktop build
+
+Run `npm run build` to create the static Next.js export and compile the Electron
+main process. The build adjusts asset paths for exported pages nested under
+`settings/`, so the Settings routes can load from local files in production.
+Use `npm start` to launch the built desktop application.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

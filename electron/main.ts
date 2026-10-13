@@ -13,6 +13,16 @@ import {
   updateProduct,
 } from "./db/queries/product_edit";
 import { deleteProduct } from "./db/queries/product_delete";
+import {
+  createBrand,
+  createCategory,
+  deleteBrand,
+  deleteCategory,
+  getBrands,
+  getCategories,
+  updateBrand,
+  updateCategory,
+} from "./db/queries/catalog";
 import type { ProductFormValues } from "./db/validation/product";
 const isDev = process.env.NODE_ENV === "development";
 const stickerWindows = new Map<number, BrowserWindow>();
@@ -179,6 +189,28 @@ ipcMain.handle(
 
 ipcMain.handle("products:delete", async (_event, productId: number) =>
   deleteProduct(productId),
+);
+
+ipcMain.handle("catalog:categories:get", () => getCategories());
+ipcMain.handle("catalog:categories:create", (_event, name: string) =>
+  createCategory(name),
+);
+ipcMain.handle(
+  "catalog:categories:update",
+  (_event, id: number, name: string) => updateCategory(id, name),
+);
+ipcMain.handle("catalog:categories:delete", (_event, id: number) =>
+  deleteCategory(id),
+);
+ipcMain.handle("catalog:brands:get", () => getBrands());
+ipcMain.handle("catalog:brands:create", (_event, name: string) =>
+  createBrand(name),
+);
+ipcMain.handle("catalog:brands:update", (_event, id: number, name: string) =>
+  updateBrand(id, name),
+);
+ipcMain.handle("catalog:brands:delete", (_event, id: number) =>
+  deleteBrand(id),
 );
 
 function createWindow() {

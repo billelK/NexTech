@@ -11,6 +11,16 @@ import type {
   updateProduct,
 } from "../electron/db/queries/product_edit";
 import type { deleteProduct } from "../electron/db/queries/product_delete";
+import type {
+  createBrand,
+  createCategory,
+  deleteBrand,
+  deleteCategory,
+  getBrands,
+  getCategories,
+  updateBrand,
+  updateCategory,
+} from "../electron/db/queries/catalog";
 interface ElectronAPI {
   // getAppInfo: () => {
   //   name: string;
@@ -43,6 +53,20 @@ interface ElectronAPI {
     input: ProductFormValues,
   ) => ReturnType<typeof updateProduct>;
   deleteProduct: (productId: number) => ReturnType<typeof deleteProduct>;
+  getCategories: () => Promise<ReturnType<typeof getCategories>>;
+  createCategory: (name: string) => Promise<ReturnType<typeof createCategory>>;
+  updateCategory: (
+    id: number,
+    name: string,
+  ) => Promise<ReturnType<typeof updateCategory>>;
+  deleteCategory: (id: number) => Promise<ReturnType<typeof deleteCategory>>;
+  getBrands: () => Promise<ReturnType<typeof getBrands>>;
+  createBrand: (name: string) => Promise<ReturnType<typeof createBrand>>;
+  updateBrand: (
+    id: number,
+    name: string,
+  ) => Promise<ReturnType<typeof updateBrand>>;
+  deleteBrand: (id: number) => Promise<ReturnType<typeof deleteBrand>>;
 }
 
 declare global {

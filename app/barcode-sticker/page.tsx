@@ -14,7 +14,7 @@ const A4_HEIGHT_MM = 297;
 const SHEET_MARGIN_MM = 10;
 const STICKER_GAP_MM = 3;
 const PREVIEW_SCALE = 0.55;
-const SINGLE_STICKER_SCALE = 2.7;
+const SINGLE_STICKER_SCALE = 2;
 const MAX_STICKERS_PER_JOB = 1000;
 
 type StickerData = Awaited<
@@ -332,7 +332,7 @@ export default function BarcodeStickerPage() {
         </p>
       )}
 
-      <section className="sticker-preview mx-auto mt-6 flex min-h-[440px] max-w-5xl flex-col items-center gap-6 overflow-auto rounded-xl border bg-muted/40 p-6">
+      <section className="sticker-preview mx-auto mt-6 flex h-[min(55vh,400px)] min-h-[280px] max-w-5xl flex-col items-center gap-6 overflow-auto overscroll-contain rounded-xl border bg-muted/40 p-6 [scrollbar-color:var(--border)_transparent] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border">
         <div
           className="single-sticker-preview"
           style={{ display: previewMode === "single" ? "flex" : "none" }}

@@ -198,6 +198,9 @@ export function AddProductDialog({
           : window.electronAPI.getProductForEdit(productId),
       ]);
       setOptions(formOptions);
+      setOptionsError(
+        `Diagnostic: ${formOptions.brands.length} brands, ${formOptions.categories.length} categories loaded.`
+      );
       if (productId !== null) {
         if (!product) throw new Error("The product could not be found.");
         form.reset({
@@ -219,15 +222,18 @@ export function AddProductDialog({
         });
       }
     } catch (cause) {
-      setOptionsError(
-        cause instanceof Error
-          ? cause.message
-          : "Could not load the product form.",
-      );
-    } finally {
-      setIsLoadingOptions(false);
-      setIsLoadingProduct(false);
-    }
+        console.error("[AddProduct] Failed to load form options:", cause);
+
+        const message =
+          cause instanceof Error
+            ? `${cause.name}: ${cause.message}`
+            : String(cause);
+
+        setOptionsError(message);
+      } finally {
+        setIsLoadingOptions(false);
+        setIsLoadingProduct(false);
+      }
   }, [form]);
 
   useEffect(() => {

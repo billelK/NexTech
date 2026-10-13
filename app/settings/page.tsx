@@ -1,106 +1,74 @@
-"use client";
+import { ArrowUpRight, Boxes, Store, Tags } from "lucide-react";
+import { AppLink } from "@/components/layout/app-link";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardTitle,
+} from "@/components/ui/card";
 
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import { ArrowLeft, Save } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+const settingsSections = [
+  {
+    title: "Store Information",
+    description: "Manage the store name used on printed barcode stickers.",
+    href: "/settings/store",
+    icon: Store,
+  },
+  {
+    title: "Categories",
+    description: "Organize products into clear inventory categories.",
+    href: "/settings/categories",
+    icon: Tags,
+  },
+  {
+    title: "Brands",
+    description: "Manage the brands available when adding products.",
+    href: "/settings/brands",
+    icon: Boxes,
+  },
+];
 
 export default function SettingsPage() {
-  const [storeName, setStoreName] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let active = true;
-    window.electronAPI
-      .getStoreName()
-      .then((value) => {
-        if (active) setStoreName(value);
-      })
-      .catch((cause: unknown) => {
-        if (active) {
-          setError(
-            cause instanceof Error
-              ? cause.message
-              : "Could not load application settings.",
-          );
-        }
-      })
-      .finally(() => {
-        if (active) setIsLoading(false);
-      });
-
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  async function saveStoreName(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setIsSaving(true);
-    setMessage(null);
-    setError(null);
-    try {
-      const savedName = await window.electronAPI.setStoreName(storeName);
-      setStoreName(savedName);
-      setMessage("Shop name saved.");
-    } catch (cause) {
-      setError(
-        cause instanceof Error
-          ? cause.message
-          : "Could not save the shop name.",
-      );
-    } finally {
-      setIsSaving(false);
-    }
-  }
-
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-col gap-6 p-6">
-      <div className="flex items-center gap-3">
-        <Button
-          variant="outline"
-          size="icon"
-          aria-label="Back to inventory"
-          nativeButton={false}
-          render={<Link href="/inventory" />}
-        >
-          <ArrowLeft />
-        </Button>
-        <div>
+    <main className="h-full overflow-y-auto p-6">
+      <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
+        <header>
           <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
-          <p className="text-sm text-muted-foreground">Configure store information.</p>
-        </div>
-      </div>
-
-      <form onSubmit={(event) => void saveStoreName(event)} className="space-y-4 rounded-xl border bg-card p-5">
-        <div>
-          <h2 className="font-semibold">Barcode stickers</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            This name appears vertically along the left side of printed product stickers.
+            Configure your store and organize your product catalog.
           </p>
-        </div>
-        <label className="grid gap-2 text-sm font-medium">
-          Shop name
-          <Input
-            autoComplete="organization"
-            maxLength={60}
-            value={storeName}
-            onChange={(event) => setStoreName(event.target.value)}
-            placeholder="Enter your shop name"
-            disabled={isLoading || isSaving}
-          />
-        </label>
-        {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
-        {message && <p role="status" className="text-sm text-muted-foreground">{message}</p>}
-        <Button type="submit" disabled={isLoading || isSaving}>
-          <Save />
-          {isSaving ? "Saving..." : "Save settings"}
-        </Button>
-      </form>
+        </header>
+
+        <section
+          aria-label="Settings sections"
+          className="grid gap-4 md:grid-cols-2 xl:grid-cols-3"
+        >
+          {settingsSections.map(({ title, description, href, icon: Icon }) => (
+            <AppLink
+              key={href}
+              href={href}
+              className="group rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <Card className="h-full gap-5 border-white/8 py-5 transition-colors group-hover:border-white/15 group-hover:bg-muted/30">
+                <CardContent className="flex items-start gap-4 px-5">
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-white/8 bg-muted/50 text-primary">
+                    <Icon className="size-5" />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-3">
+                      <CardTitle>{title}</CardTitle>
+                      <ArrowUpRight className="size-4 shrink-0 text-muted-foreground transition-colors group-hover:text-foreground" />
+                    </div>
+                    <CardDescription className="mt-2 leading-relaxed">
+                      {description}
+                    </CardDescription>
+                  </div>
+                </CardContent>
+              </Card>
+            </AppLink>
+          ))}
+        </section>
+      </div>
     </main>
   );
 }
