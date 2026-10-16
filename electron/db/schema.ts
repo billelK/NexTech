@@ -51,9 +51,7 @@ export const products = sqliteTable(
 
     barcode: text("barcode"),
 
-    brandId: integer("brand_id")
-      .notNull()
-      .references(() => brands.id),
+    brandId: integer("brand_id").references(() => brands.id),
 
     categoryId: integer("category_id")
       .notNull()

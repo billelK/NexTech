@@ -28,7 +28,7 @@ export async function getProducts() {
       updatedAt: products.updatedAt,
     })
     .from(products)
-    .innerJoin(brands, eq(products.brandId, brands.id))
+    .leftJoin(brands, eq(products.brandId, brands.id))
     .innerJoin(categories, eq(products.categoryId, categories.id))
     .orderBy(products.id);
 }

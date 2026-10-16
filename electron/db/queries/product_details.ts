@@ -36,7 +36,7 @@ export async function getProductDetails(productId: number) {
       serialNumber: laptopSpecs.serialNumber,
     })
     .from(products)
-    .innerJoin(brands, eq(products.brandId, brands.id))
+    .leftJoin(brands, eq(products.brandId, brands.id))
     .innerJoin(categories, eq(products.categoryId, categories.id))
     .leftJoin(laptopSpecs, eq(products.id, laptopSpecs.productId))
     .where(eq(products.id, productId))

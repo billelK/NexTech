@@ -14,30 +14,41 @@ export default function StoreSettingsPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    let active = true;
-    window.electronAPI
-      .getStoreName()
-      .then((value) => {
-        if (active) setStoreName(value);
-      })
-      .catch((cause: unknown) => {
-        if (active) {
-          setError(
-            cause instanceof Error
-              ? cause.message
-              : "Could not load application settings.",
-          );
-        }
-      })
-      .finally(() => {
-        if (active) setIsLoading(false);
-      });
+  
+useEffect(() => {
+  let active = true;
 
-    return () => {
-      active = false;
-    };
-  }, []);
+  async function loadStoreName() {
+    try {
+      const value = await window.electronAPI.getStoreName();
+
+      if (active) {
+        setStoreName(value);
+      }
+    } catch (cause: unknown) {
+      if (active) {
+        setError(
+          cause instanceof Error
+            ? cause.message
+            : String(cause) || "Could not load application settings.",
+        );
+      }
+    } finally {
+      if (active) {
+        setIsLoading(false);
+      }
+    }
+  }
+
+  void loadStoreName();
+
+  return () => {
+    active = false;
+  };
+}, []);
+
+
+  console.log({ isLoading, isSaving, error });
 
   async function saveStoreName(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -86,6 +97,11 @@ export default function StoreSettingsPage() {
           onSubmit={(event) => void saveStoreName(event)}
           className="space-y-4 rounded-xl border bg-card p-5"
         >
+          {isLoading && (
+          <p role="status" className="text-sm text-yellow-500">
+            Loading store settings...
+          </p>
+        )}
           <div>
             <h2 className="font-semibold">Barcode stickers</h2>
             <p className="mt-1 text-sm text-muted-foreground">

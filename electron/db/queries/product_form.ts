@@ -25,17 +25,8 @@ export async function createProduct(input: ProductFormValues) {
     .from(categories)
     .where(eq(categories.id, input.categoryId))
     .get();
-  const brand = db
-    .select({ id: brands.id })
-    .from(brands)
-    .where(eq(brands.id, input.brandId))
-    .get();
-
   if (!category) {
     throw new Error("The selected category is no longer available.");
-  }
-  if (!brand) {
-    throw new Error("The selected brand is no longer available.");
   }
 
   const isLaptop = isLaptopCategory(category.name);
@@ -45,6 +36,18 @@ export async function createProduct(input: ProductFormValues) {
   }
 
   const values = parsed.data;
+  if (values.brandId !== null) {
+    const brand = db
+      .select({ id: brands.id })
+      .from(brands)
+      .where(eq(brands.id, values.brandId))
+      .get();
+
+    if (!brand) {
+      throw new Error("The selected brand is no longer available.");
+    }
+  }
+
   const quantity =
     values.trackingType === "SERIALIZED" ? 1 : values.quantity;
   const status = quantity === 0 ? "SOLD" : "AVAILABLE";

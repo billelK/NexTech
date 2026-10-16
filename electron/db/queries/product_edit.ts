@@ -33,7 +33,7 @@ export async function getProductForEdit(productId: number) {
         serialNumber: laptopSpecs.serialNumber,
       })
       .from(products)
-      .innerJoin(brands, eq(products.brandId, brands.id))
+      .leftJoin(brands, eq(products.brandId, brands.id))
       .innerJoin(categories, eq(products.categoryId, categories.id))
       .leftJoin(laptopSpecs, eq(products.id, laptopSpecs.productId))
       .where(eq(products.id, productId))
@@ -65,17 +65,8 @@ export async function updateProduct(
     .from(categories)
     .where(eq(categories.id, input.categoryId))
     .get();
-  const brand = db
-    .select({ id: brands.id })
-    .from(brands)
-    .where(eq(brands.id, input.brandId))
-    .get();
-
   if (!category) {
     throw new Error("The selected category is no longer available.");
-  }
-  if (!brand) {
-    throw new Error("The selected brand is no longer available.");
   }
 
   const isLaptop = isLaptopCategory(category.name);
@@ -87,6 +78,18 @@ export async function updateProduct(
   }
 
   const values = parsed.data;
+  if (values.brandId !== null) {
+    const brand = db
+      .select({ id: brands.id })
+      .from(brands)
+      .where(eq(brands.id, values.brandId))
+      .get();
+
+    if (!brand) {
+      throw new Error("The selected brand is no longer available.");
+    }
+  }
+
   if (values.trackingType === "SERIALIZED" && values.quantity > 1) {
     throw new Error("Serialized product quantity must be 0 or 1.");
   }

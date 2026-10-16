@@ -1,6 +1,7 @@
 import { app, BrowserWindow, ipcMain, Menu } from "electron";
 import path from "node:path";
 import { runMigrations } from "./db/index";
+import { seedDefaultCatalogs } from "./db/seed";
 import { getProducts } from "./db/queries/products";
 import { getProductDetails } from "./db/queries/product_details";
 import { getStoreName, setStoreName } from "./db/queries/app_settings";
@@ -237,8 +238,9 @@ function createWindow() {
 }
 
 app.whenReady().then(async () => {
-   runMigrations();
-    createWindow();
+  runMigrations();
+  seedDefaultCatalogs();
+  createWindow();
 
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) {

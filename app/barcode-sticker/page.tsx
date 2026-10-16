@@ -65,6 +65,7 @@ async function waitForA4PrintDocument(
 export default function BarcodeStickerPage() {
   const [data, setData] = useState<StickerData | null>(null);
   const [storeName, setStoreName] = useState("");
+  const [needsStoreName, setNeedsStoreName] = useState(false);
   const [isSavingStoreName, setIsSavingStoreName] = useState(false);
   const [storeNameError, setStoreNameError] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -103,6 +104,7 @@ export default function BarcodeStickerPage() {
         if (active) {
           setData(result);
           setStoreName(result.storeName);
+          setNeedsStoreName(!result.storeName.trim());
         }
       })
       .catch((cause: unknown) => {
@@ -127,6 +129,7 @@ export default function BarcodeStickerPage() {
     try {
       const savedName = await window.electronAPI.setStoreName(storeName);
       setStoreName(savedName);
+      setNeedsStoreName(false);
     } catch (cause) {
       setStoreNameError(
         cause instanceof Error ? cause.message : "Could not save the shop name.",
@@ -289,7 +292,7 @@ export default function BarcodeStickerPage() {
         {sheetCount === 1 ? "sheet" : "sheets"} required
       </p>
 
-      {!storeName.trim() && (
+      {needsStoreName && (
         <div className="sticker-controls mx-auto mt-5 max-w-5xl space-y-3 rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 text-sm">
           <p>Set the shop name before printing. It will be saved for future stickers.</p>
           <form

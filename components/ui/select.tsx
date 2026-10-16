@@ -46,15 +46,17 @@ export function SelectField({
       </SelectPrimitive.Trigger>
       <SelectPrimitive.Portal>
         <SelectPrimitive.Positioner sideOffset={4} className="z-[60] outline-none">
-          <SelectPrimitive.Popup className="max-h-60 min-w-[var(--anchor-width)] overflow-y-auto rounded-lg border bg-popover p-1 text-popover-foreground shadow-md">
+          <SelectPrimitive.Popup className="app-scrollbar max-h-60 w-max min-w-[var(--anchor-width)] max-w-[var(--available-width)] overflow-y-auto overscroll-contain rounded-lg border bg-popover p-1 text-popover-foreground shadow-md">
             <SelectPrimitive.List>
               {options.map((option) => (
                 <SelectPrimitive.Item
                   key={option.value}
                   value={option.value}
-                  className="relative flex cursor-default items-center rounded-md py-1.5 pr-8 pl-2 text-sm outline-none data-highlighted:bg-accent data-highlighted:text-accent-foreground"
+                  className="relative flex min-w-0 cursor-default items-center whitespace-nowrap rounded-md py-1.5 pr-8 pl-2 text-sm outline-none data-highlighted:bg-accent data-highlighted:text-accent-foreground"
                 >
-                  <SelectPrimitive.ItemText>{option.label}</SelectPrimitive.ItemText>
+                  <SelectPrimitive.ItemText className="block min-w-0 truncate">
+                    {option.label}
+                  </SelectPrimitive.ItemText>
                   <SelectPrimitive.ItemIndicator className="absolute right-2 inline-flex">
                     <Check className="size-4" />
                   </SelectPrimitive.ItemIndicator>

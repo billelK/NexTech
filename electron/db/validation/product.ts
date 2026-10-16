@@ -5,7 +5,7 @@ const productFieldsSchema = z.object({
     40,
     "Product name must be 40 characters or fewer.",
   ),
-  brandId: z.number().int().positive("Select a brand."),
+  brandId: z.number().int().positive().nullable(),
   categoryId: z.number().int().positive("Select a category."),
   trackingType: z.enum(["QUANTITY", "SERIALIZED"]),
   quantity: z.number().int().min(1, "Quantity cannot be less than 1."),

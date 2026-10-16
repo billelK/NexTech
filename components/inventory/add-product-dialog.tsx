@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
-import { LayersPlus } from "lucide-react";
+import { Check, ChevronDown, LayersPlus, X } from "lucide-react";
+import { Combobox } from "@base-ui/react/combobox";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SelectField, type SelectOption } from "@/components/ui/select";
@@ -34,7 +35,7 @@ type AddProductDialogProps = {
 
 const defaultValues: ProductFormValues = {
   name: "",
-  brandId: 0,
+  brandId: null,
   categoryId: 0,
   trackingType: "QUANTITY",
   quantity: 0,
@@ -150,6 +151,7 @@ export function AddProductDialog({
   const [isLoadingOptions, setIsLoadingOptions] = useState(false);
   const [isLoadingProduct, setIsLoadingProduct] = useState(isEditing);
   const [optionsError, setOptionsError] = useState<string | null>(null);
+  const brandInputId = useId();
   const form = useForm<ProductFormValues>({
     defaultValues,
   });
@@ -198,9 +200,6 @@ export function AddProductDialog({
           : window.electronAPI.getProductForEdit(productId),
       ]);
       setOptions(formOptions);
-      setOptionsError(
-        `Diagnostic: ${formOptions.brands.length} brands, ${formOptions.categories.length} categories loaded.`
-      );
       if (productId !== null) {
         if (!product) throw new Error("The product could not be found.");
         form.reset({
@@ -230,6 +229,7 @@ export function AddProductDialog({
             : String(cause);
 
         setOptionsError(message);
+
       } finally {
         setIsLoadingOptions(false);
         setIsLoadingProduct(false);
@@ -291,10 +291,14 @@ export function AddProductDialog({
     }
   });
 
-  const brandOptions = options.brands.map(({ id, name }) => ({
-    value: String(id),
-    label: name,
-  }));
+  const brandItems = useMemo(
+    () =>
+      Combobox.createItems(options.brands, {
+        getValue: (brand) => brand.id,
+        getLabel: (brand) => brand.name,
+      }),
+    [options.brands],
+  );
   const categoryOptions = options.categories.map(({ id, name }) => ({
     value: String(id),
     label: name,
@@ -322,7 +326,7 @@ export function AddProductDialog({
           className="flex min-h-0 flex-1 flex-col"
           onSubmit={submit}
         >
-          <div className="grid min-h-0 flex-1 content-start gap-4 overflow-y-auto overscroll-contain px-6 py-5 [scrollbar-color:var(--border)_transparent] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border">
+          <div className="app-scrollbar grid min-h-0 flex-1 content-start gap-4 overflow-y-auto overscroll-contain px-6 py-5">
           {isLoadingProduct && (
             <p className="sm:col-span-2 text-sm text-muted-foreground">
               Loading product details...
@@ -350,10 +354,9 @@ export function AddProductDialog({
           )}
           {!isLoadingOptions &&
             !optionsError &&
-            (options.brands.length === 0 || options.categories.length === 0) && (
+            options.categories.length === 0 && (
               <p className="sm:col-span-2 text-sm text-muted-foreground">
-                Add at least one brand and one category before creating a
-                product.
+                Add at least one category before creating a product.
               </p>
             )}
 
@@ -367,27 +370,68 @@ export function AddProductDialog({
             />
           </label>
 
-          <label className={fieldClassName}>
-            Brand
-            <SelectField
-              value={
-                selectedBrandId > 0
-                  ? String(selectedBrandId)
-                  : null
+          <div className={fieldClassName}>
+            <label htmlFor={brandInputId}>Brand</label>
+            <Combobox.Root
+              items={brandItems}
+              value={selectedBrandId ?? null}
+              onValueChange={(value) =>
+                form.setValue("brandId", value, { shouldDirty: true })
               }
-              options={brandOptions}
-              placeholder="Select a brand"
-              disabled={isLoadingOptions || brandOptions.length === 0}
-              invalid={Boolean(form.formState.errors.brandId)}
-              onValueChange={(value) => {
-                if (value !== null) {
-                  form.setValue("brandId", Number(value), {
-                    shouldDirty: true,
-                  });
-                }
-              }}
-            />
-          </label>
+              disabled={isLoadingOptions}
+            >
+              <Combobox.InputGroup
+                aria-invalid={Boolean(form.formState.errors.brandId)}
+                className="flex h-8 w-full items-center gap-1 rounded-lg border border-input bg-background px-2.5 text-sm focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20"
+              >
+                <Combobox.Input
+                  id={brandInputId}
+                  autoComplete="off"
+                  placeholder="Search or select a brand"
+                  aria-invalid={Boolean(form.formState.errors.brandId)}
+                  className="h-full min-w-0 flex-1 border-0 bg-transparent p-0 text-sm outline-none placeholder:text-muted-foreground focus-visible:ring-0"
+                />
+                <Combobox.Clear
+                  aria-label="Clear selected brand"
+                  className="inline-flex size-6 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground disabled:pointer-events-none"
+                >
+                  <X className="size-4" />
+                </Combobox.Clear>
+                <Combobox.Trigger
+                  aria-label="Show brands"
+                  className="inline-flex size-6 shrink-0 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground disabled:pointer-events-none"
+                >
+                  <ChevronDown className="size-4" />
+                </Combobox.Trigger>
+              </Combobox.InputGroup>
+              <Combobox.Portal>
+                <Combobox.Positioner
+                  sideOffset={4}
+                  className="z-[70] outline-none"
+                >
+                  <Combobox.Popup className="w-max min-w-[var(--anchor-width)] max-w-[var(--available-width)] rounded-lg border bg-popover text-popover-foreground shadow-md">
+                    <Combobox.Empty className="px-3 py-2 text-sm text-muted-foreground">
+                      No brands found.
+                    </Combobox.Empty>
+                    <Combobox.List className="app-scrollbar max-h-60 overflow-y-auto overscroll-contain p-1">
+                      {(brand) => (
+                        <Combobox.Item
+                          key={brand.id}
+                          value={brand.id}
+                          className="flex cursor-default items-center gap-2 rounded-md px-2 py-1.5 text-sm outline-none data-highlighted:bg-accent data-highlighted:text-accent-foreground"
+                        >
+                          <Combobox.ItemIndicator className="inline-flex size-4 items-center justify-center">
+                            <Check className="size-4" />
+                          </Combobox.ItemIndicator>
+                          <span>{brand.name}</span>
+                        </Combobox.Item>
+                      )}
+                    </Combobox.List>
+                  </Combobox.Popup>
+                </Combobox.Positioner>
+              </Combobox.Portal>
+            </Combobox.Root>
+          </div>
 
           <label className={fieldClassName}>
             Category

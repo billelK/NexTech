@@ -339,7 +339,7 @@ export default function InventoryPage() {
         !normalizedSearch ||
         product.name.toLowerCase().includes(normalizedSearch) ||
         (product.barcode ?? "").toLowerCase().includes(normalizedSearch) ||
-        product.brand.toLowerCase().includes(normalizedSearch);
+        (product.brand ?? "").toLowerCase().includes(normalizedSearch);
 
       const matchesCategory =
         selectedCategoryId === "all" ||
@@ -791,6 +791,8 @@ export default function InventoryPage() {
                               </span>
                             ) : column.key === "sellingPrice" && typeof value === "number" ? (
                               `${formatValue(value)} DA`
+                            ) : column.key === "brand" && value === null ? (
+                              "—"
                             ) : (
                               formatValue(value)
                             )}

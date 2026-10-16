@@ -162,7 +162,7 @@ export function ProductDetailsDialog({
             <DialogTitle>{product?.name ?? "Product details"}</DialogTitle>
             {product && (
               <DialogDescription>
-                {product.brand} · {product.category}
+                {formatValue(product.brand)} · {product.category}
               </DialogDescription>
             )}
             {product && (

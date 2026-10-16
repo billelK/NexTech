@@ -27,6 +27,22 @@ main process. The build adjusts asset paths for exported pages nested under
 `settings/`, so the Settings routes can load from local files in production.
 Use `npm start` to launch the built desktop application.
 
+### Default catalog data
+
+On each Electron startup, `electron/main.ts` runs Drizzle migrations and then
+inserts the approved default categories and brands into the active SQLite
+database. Inserts use the unique name constraints with conflict-ignore, so
+existing records and IDs are left untouched. Development uses `data/dev.db`;
+production uses `nextech.db` in Electron's `app.getPath("userData")` directory.
+
+To verify the seed in either database, query its `categories` and `brands`
+tables:
+
+```sql
+SELECT name FROM categories ORDER BY name;
+SELECT name FROM brands ORDER BY name;
+```
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

@@ -219,9 +219,9 @@ export function CatalogManagementPage({
   }
 
   return (
-    <main className="h-full overflow-y-auto p-6">
-      <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
-        <header className="flex items-center gap-3">
+    <main className="h-full min-h-0 overflow-hidden p-6">
+      <div className="mx-auto flex h-full min-h-0 w-full max-w-5xl flex-col gap-6">
+        <header className="flex shrink-0 items-center gap-3">
           <Button
             variant="outline"
             size="icon"
@@ -239,8 +239,8 @@ export function CatalogManagementPage({
           </div>
         </header>
 
-        <section className="overflow-hidden rounded-xl border bg-card">
-          <div className="flex flex-col gap-3 border-b border-white/6 p-4 sm:flex-row sm:items-center sm:justify-between">
+        <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border bg-card">
+          <div className="flex shrink-0 flex-col gap-3 border-b border-white/6 p-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="relative w-full sm:max-w-xs">
               <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
               <Input
@@ -263,7 +263,7 @@ export function CatalogManagementPage({
           {loadError && (
             <div
               role="alert"
-              className="m-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive"
+              className="m-4 flex shrink-0 flex-wrap items-center justify-between gap-3 rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive"
             >
               <span>{loadError}</span>
               <Button
@@ -281,15 +281,15 @@ export function CatalogManagementPage({
           )}
 
           {isLoading ? (
-            <p className="px-4 py-12 text-center text-sm text-muted-foreground">
+            <p className="shrink-0 px-4 py-12 text-center text-sm text-muted-foreground">
               Loading {pluralName}...
             </p>
           ) : loadError && records.length === 0 ? (
-            <p className="px-4 py-12 text-center text-sm text-muted-foreground">
+            <p className="shrink-0 px-4 py-12 text-center text-sm text-muted-foreground">
               {title} could not be displayed until they can be loaded.
             </p>
           ) : records.length === 0 ? (
-            <div className="px-4 py-12 text-center">
+            <div className="shrink-0 px-4 py-12 text-center">
               <p className="font-medium">No {pluralName} yet</p>
               <p className="mt-1 text-sm text-muted-foreground">
                 Add a {singularName} to make it available in your product
@@ -297,14 +297,14 @@ export function CatalogManagementPage({
               </p>
             </div>
           ) : filteredRecords.length === 0 ? (
-            <p className="px-4 py-12 text-center text-sm text-muted-foreground">
+            <p className="shrink-0 px-4 py-12 text-center text-sm text-muted-foreground">
               No {pluralName} match &quot;{search}&quot;.
             </p>
           ) : (
             <>
-              <div className="overflow-x-auto">
+              <div className="app-scrollbar min-h-0 flex-1 overflow-auto overscroll-contain">
                 <Table>
-                  <TableHeader>
+                  <TableHeader className="sticky top-0 z-10 bg-card">
                     <TableRow className="hover:bg-transparent">
                       <TableHead>{isCategory ? "Category" : "Brand"}</TableHead>
                       <TableHead className="w-28 text-right">Actions</TableHead>
@@ -347,7 +347,7 @@ export function CatalogManagementPage({
               </div>
 
               {filteredRecords.length > PAGE_SIZE && (
-                <div className="flex items-center justify-between border-t border-white/6 px-4 py-3">
+                <div className="flex shrink-0 items-center justify-between border-t border-white/6 px-4 py-3">
                   <p className="text-xs text-muted-foreground">
                     Showing {(currentPage - 1) * PAGE_SIZE + 1}–
                     {Math.min(currentPage * PAGE_SIZE, filteredRecords.length)}{" "}
